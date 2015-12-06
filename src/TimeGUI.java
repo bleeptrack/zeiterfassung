@@ -25,6 +25,7 @@ public class TimeGUI extends Application {
     private TimeTable tt;
 
     public static void main(String[] args) {
+        System.setProperty("glass.accessible.force", "false");
         launch(args);
     }
 
@@ -196,7 +197,7 @@ public class TimeGUI extends Application {
                 //System.out.println(pic.getId());
                 File file = fileChooser.showSaveDialog(primaryStage);
                 if (file != null) {
-                    System.out.println("save");
+
                     String[] spl = daystart.getText().split(":");
                     LocalTime ds = LocalTime.of(Integer.parseInt(spl[0]), Integer.parseInt(spl[1]));
                     spl = dayend.getText().split(":");
@@ -224,6 +225,7 @@ public class TimeGUI extends Application {
                     }
                     tt = new TimeTable(months.getSelectionModel().getSelectedIndex(), Integer.parseInt(year.getText()), ds, de, ps, pe, iv, h, wd, mst, men);
                     tt.printResults(file);
+
                 }
             }
         });

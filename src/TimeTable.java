@@ -2,6 +2,7 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -49,7 +50,7 @@ public class TimeTable {
     public TimeTable(int month, int years, LocalTime dayStart, LocalTime dayEnd, LocalTime pauseStart, LocalTime pauseEnd,
                      LocalTime interval, int hourspm, boolean[] weekdays, int stday, int enday){
         this.month = month;
-        System.out.println(month);
+
         this.year = years;
 
         Calendar cal = new GregorianCalendar(year, month, 1);
@@ -87,8 +88,7 @@ public class TimeTable {
             Calendar c = Calendar.getInstance();
             c.set(year, month, i);
             Date date = c.getTime();
-            System.out.println(isHoliday(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)));
-            if (weekdays[c.get(Calendar.DAY_OF_WEEK) - 1] && !isHoliday(c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH))) {
+                       if (weekdays[c.get(Calendar.DAY_OF_WEEK) - 1] && !isHoliday(c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH))) {
                 hours[count][0] = c.get(Calendar.DAY_OF_MONTH);
                 count++;
             }
@@ -121,11 +121,11 @@ public class TimeTable {
         //create random beginnings
         for (int i = 0; i < workingdays; i++) {
             long restTime = Duration.between(dayStart, pauseStart).toMinutes() - hours[i][1] * interval.getMinute();
-            long minutes = (long) (Math.random() * (restTime / interval.getMinute()));
+            long minutes = (long) (Math.random() * (restTime / interval.getMinute()+1));
             starts[i][0] = dayStart.plusMinutes(minutes * interval.getMinute());
 
             restTime = Duration.between(pauseEnd, dayEnd).toMinutes() - hours[i][2] * interval.getMinute();
-            minutes = (long) (Math.random() * (restTime / interval.getMinute()));
+            minutes = (long) (Math.random() * (restTime / interval.getMinute()+1));
             starts[i][1] = pauseEnd.plusMinutes(minutes * interval.getMinute());
         }
 
@@ -162,6 +162,12 @@ public class TimeTable {
             }
 
             writer.close();
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Speichern erfolgreich");
+            alert.setHeaderText(null);
+            alert.setContentText("Dein Zeiterfassungsbericht wurde gespeichert.");
+
+            alert.showAndWait();
         } catch (Exception e) {
 
         }
@@ -187,38 +193,20 @@ public class TimeTable {
     private boolean isHoliday(int year, int month, int day)
     {
         GregorianCalendar testday = new GregorianCalendar(year, month, day);
-        int jahr = year;
 
-        int a = jahr % 19;
-        int b = jahr % 4;
-        int c = jahr % 7;
-        int monat = 0;
 
-        int m = (8 * (jahr / 100) + 13) / 25 - 2;
-        int s = jahr / 100 - jahr / 400 - 2;
-        m = (15 + s - m) % 30;
-        int n = (6 + s) % 7;
+        int i = year % 19;
+        int j = year / 100;
+        int k = year % 100;
 
-        int d = (m + 19 * a) % 30;
+        int l = (19 * i + j - (j / 4) - ((j - ((j + 8) / 25) + 1) / 3) + 15) % 30;
+        int m = (32 + 2 * (j % 4) + 2 * (k / 4) - l - (k % 4)) % 7;
+        int n = l + m - 7 * ((i + 11 * l + 22 * m) / 451) + 114;
 
-        if (d == 29)
-            d = 28;
-        else if (d == 28 && a >= 11)
-            d = 27;
+        int mo = n / 31;
+        int d   = (n % 31) + 1;
 
-        int e = (2 * b + 4 * c + 6 * d + n) % 7;
-
-        int tag = 21 + d + e + 1;
-
-        if (tag > 31)
-        {
-            tag = tag % 31;
-            monat = 3;
-        }
-        if (tag <= 31)
-            monat = 2;
-
-        GregorianCalendar gc_ostersonntag = new GregorianCalendar(jahr, monat, tag);
+        GregorianCalendar gc_ostersonntag = new GregorianCalendar(year, mo-1, d);
         GregorianCalendar gc_ostermontag = new GregorianCalendar(gc_ostersonntag.get(Calendar.YEAR), gc_ostersonntag.get(Calendar.MONTH), (gc_ostersonntag.get(Calendar.DATE) + 1));
         GregorianCalendar gc_karfreitag = new GregorianCalendar(gc_ostersonntag.get(Calendar.YEAR), gc_ostersonntag.get(Calendar.MONTH), (gc_ostersonntag.get(Calendar.DATE) - 2));
         GregorianCalendar gc_rosenmontag = new GregorianCalendar(gc_ostersonntag.get(Calendar.YEAR), gc_ostersonntag.get(Calendar.MONTH), (gc_ostersonntag.get(Calendar.DATE) - 48));
@@ -232,11 +220,11 @@ public class TimeTable {
         GregorianCalendar gc_weihnachten_3 = new GregorianCalendar(gc_ostersonntag.get(Calendar.YEAR), 11, 26);
         GregorianCalendar gc_silvester = new GregorianCalendar(gc_ostersonntag.get(Calendar.YEAR), 11, 31);
         GregorianCalendar gc_neujahr = new GregorianCalendar(gc_silvester.get(Calendar.YEAR), 0, 1);
+        GregorianCalendar gc_tagderarbeit = new GregorianCalendar(gc_silvester.get(Calendar.YEAR), 4, 1);
 
-        System.out.println(gc_weihnachten_2.toString());
-        System.out.println(testday.toString());
+        System.out.println(gc_karfreitag.get(Calendar.MONTH)+" "+gc_karfreitag.get(Calendar.MONTH));
 
-        if(gc_pfinstsonntag.equals(testday) || gc_ostermontag.equals(testday) || gc_karfreitag.equals(testday) ||
+        if(gc_tagderarbeit.equals(testday) || gc_pfinstsonntag.equals(testday) || gc_ostermontag.equals(testday) || gc_karfreitag.equals(testday) ||
                 gc_rosenmontag.equals(testday) || gc_christihimmelfahrt.equals(testday) || gc_pfinstmontag.equals(testday) ||
                 gc_frohnleichnahm.equals(testday) || gc_weihnachten_1.equals(testday) || gc_weihnachten_2.equals(testday) ||
                 gc_weihnachten_3.equals(testday) || gc_silvester.equals(testday) || gc_neujahr.equals(testday) ||
