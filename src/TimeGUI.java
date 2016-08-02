@@ -1,5 +1,5 @@
 /**
- * Created by Sabine on 04.12.2015.
+ * Created by Bleeptrack on 04.12.2015.
  */
 
 import javafx.application.Application;
@@ -37,7 +37,7 @@ public class TimeGUI extends Application {
         pane.setHgap(10);
         pane.setVgap(10);
         pane.setPadding(new Insets(25, 25, 25, 25));
-        Scene scene = new Scene(pane, 600, 350);
+        Scene scene = new Scene(pane, 600, 480);
 
 
         Label total = new Label("Monat");
@@ -160,11 +160,23 @@ public class TimeGUI extends Application {
         hbox.getChildren().add(so);
         pane.add(hbox, 0, 5, 4,5);
 
+        Label lname = new Label("Name:");
+        pane.add(lname,0,8,5,8);
+        final TextField name = new TextField();
+        name.setText("");
+        pane.add(name, 1,8,3,8);
+
+        Label lein = new Label("Einrichtung:");
+        pane.add(lein,0,14,5,8);
+        final TextField ein = new TextField();
+        ein.setText("");
+        pane.add(ein, 1,14,3,8);
+
         HBox genbox = new HBox();
         genbox.setAlignment(Pos.CENTER);
         Button createbtn = new Button("Generieren und speichern");
         genbox.getChildren().add(createbtn);
-        pane.add(genbox,0,8,4,8);
+        pane.add(genbox,0,20,4,8);
 
 
 
@@ -192,7 +204,8 @@ public class TimeGUI extends Application {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Zeiterfassung speichern");
                 fileChooser.getExtensionFilters().addAll(
-                        new FileChooser.ExtensionFilter(".cvs", "*.cvs")
+                        //new FileChooser.ExtensionFilter(".cvs", "*.cvs")
+                        new FileChooser.ExtensionFilter(".jpg", "*.jpg")
                 );
                 //System.out.println(pic.getId());
                 File file = fileChooser.showSaveDialog(primaryStage);
@@ -223,8 +236,8 @@ public class TimeGUI extends Application {
                         mst=Integer.parseInt(mstart.getText());
                         men=Integer.parseInt(mend.getText());
                     }
-                    tt = new TimeTable(months.getSelectionModel().getSelectedIndex(), Integer.parseInt(year.getText()), ds, de, ps, pe, iv, h, wd, mst, men);
-                    tt.printResults(file);
+                    tt = new TimeTable(months.getSelectionModel().getSelectedIndex(), Integer.parseInt(year.getText()), ds, de, ps, pe, iv, h, wd, mst, men, name.getText(), ein.getText());
+                    tt.printResultsJPG(file);
 
                 }
             }

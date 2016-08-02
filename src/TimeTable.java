@@ -7,9 +7,11 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalTime;
@@ -17,9 +19,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
- * Created by Sabine on 28.09.2015.
+ * Created by Bleeptrack on 28.09.2015.
  */
 public class TimeTable {
+
+    int[] posx;
+    int[] posy;
+
+    String name;
+    String einrichtung;
 
      int hourspm;
      int year;
@@ -48,7 +56,22 @@ public class TimeTable {
     LocalTime[][] starts;
 
     public TimeTable(int month, int years, LocalTime dayStart, LocalTime dayEnd, LocalTime pauseStart, LocalTime pauseEnd,
-                     LocalTime interval, int hourspm, boolean[] weekdays, int stday, int enday){
+                     LocalTime interval, int hourspm, boolean[] weekdays, int stday, int enday, String name, String einrichtung){
+        posy = new int[32];
+        posx = new int[5];
+        for(int i = 1; i<32; i++){
+            posy[i]=480+(i-1)*49;
+        }
+        for(int i = 0; i<5; i++){
+            posx[i] = 520+i*250;
+        }
+
+
+
+
+        this.einrichtung=einrichtung;
+        this.name=name;
+
         this.month = month;
 
         this.year = years;
@@ -127,6 +150,48 @@ public class TimeTable {
             restTime = Duration.between(pauseEnd, dayEnd).toMinutes() - hours[i][2] * interval.getMinute();
             minutes = (long) (Math.random() * (restTime / interval.getMinute()+1));
             starts[i][1] = pauseEnd.plusMinutes(minutes * interval.getMinute());
+        }
+
+    }
+
+    public void printResultsJPG(File f){
+        BufferedImage img = null;
+        try {
+            //img = ImageIO.read(new File("src/template.jpg"));
+            //InputStream in = getClass().getResourceAsStream("/template.jpg");
+            //BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            img = ImageIO.read(getClass().getResourceAsStream("/template.jpg"));
+
+            int w = img.getWidth();
+            int h = img.getHeight();
+
+            Graphics2D g2d = img.createGraphics();
+            g2d.drawImage(img, 0, 0, null);
+            g2d.setPaint(Color.BLACK);
+
+            g2d.setFont(new Font("Serif", Font.BOLD, 60));
+            g2d.drawString(""+einrichtung, 2060, 230);
+            g2d.drawString(""+name, 500, 230);
+            g2d.drawString(""+month+"/"+year, 1300, 135);
+
+            g2d.setFont(new Font("Serif", Font.BOLD, 40));
+
+            for(int i = 0; i<hours.length; i++){
+                g2d.drawString(""+starts[i][0], posx[0], posy[hours[i][0]]);
+                g2d.drawString(""+starts[i][0].plusMinutes(hours[i][1] * interval.getMinute()), posx[1], posy[hours[i][0]]);
+                g2d.drawString(""+starts[i][1], posx[2], posy[hours[i][0]]);
+                g2d.drawString(""+starts[i][1].plusMinutes(hours[i][1] * interval.getMinute()), posx[3], posy[hours[i][0]]);
+                g2d.drawString(""+(hours[i][1] * interval.getMinute()+hours[i][2] * interval.getMinute())/60.0, posx[4], posy[hours[i][0]]);
+            }
+
+            g2d.drawString(""+hourspm, 1520, 2000);
+            g2d.drawString(""+hourspm, 3015, 435);
+            g2d.drawString(""+hourspm, 3015, 535);
+
+            g2d.dispose();
+            ImageIO.write(img, "jpg", f);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
 
     }
