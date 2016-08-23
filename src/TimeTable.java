@@ -172,7 +172,7 @@ public class TimeTable {
             g2d.setFont(new Font("Serif", Font.BOLD, 60));
             g2d.drawString(""+einrichtung, 2060, 230);
             g2d.drawString(""+name, 500, 230);
-            g2d.drawString(""+month+"/"+year, 1300, 135);
+            g2d.drawString(""+(month+1)+"/"+year, 1300, 135);
 
             g2d.setFont(new Font("Serif", Font.BOLD, 40));
 

@@ -37,7 +37,7 @@ public class TimeGUI extends Application {
         pane.setHgap(10);
         pane.setVgap(10);
         pane.setPadding(new Insets(25, 25, 25, 25));
-        Scene scene = new Scene(pane, 600, 480);
+        Scene scene = new Scene(pane, 800, 480);
 
 
         Label total = new Label("Monat");
