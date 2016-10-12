@@ -177,10 +177,14 @@ public class TimeTable {
             g2d.setFont(new Font("Serif", Font.BOLD, 40));
 
             for(int i = 0; i<hours.length; i++){
-                g2d.drawString(""+starts[i][0], posx[0], posy[hours[i][0]]);
-                g2d.drawString(""+starts[i][0].plusMinutes(hours[i][1] * interval.getMinute()), posx[1], posy[hours[i][0]]);
-                g2d.drawString(""+starts[i][1], posx[2], posy[hours[i][0]]);
-                g2d.drawString(""+starts[i][1].plusMinutes(hours[i][1] * interval.getMinute()), posx[3], posy[hours[i][0]]);
+                if (hours[i][1] != 0) {
+                    g2d.drawString("" + starts[i][0], posx[0], posy[hours[i][0]]);
+                    g2d.drawString("" + starts[i][0].plusMinutes(hours[i][1] * interval.getMinute()), posx[1], posy[hours[i][0]]);
+                }
+                if (hours[i][2] != 0) {
+                    g2d.drawString("" + starts[i][1], posx[2], posy[hours[i][0]]);
+                    g2d.drawString("" + starts[i][1].plusMinutes(hours[i][2] * interval.getMinute()), posx[3], posy[hours[i][0]]);
+                }
                 g2d.drawString(""+(hours[i][1] * interval.getMinute()+hours[i][2] * interval.getMinute())/60.0, posx[4], posy[hours[i][0]]);
             }
 

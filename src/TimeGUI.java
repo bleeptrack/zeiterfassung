@@ -238,7 +238,7 @@ public class TimeGUI extends Application {
                     }
                     tt = new TimeTable(months.getSelectionModel().getSelectedIndex(), Integer.parseInt(year.getText()), ds, de, ps, pe, iv, h, wd, mst, men, name.getText(), ein.getText());
                     tt.printResultsJPG(file);
-
+                    //tt.printResults(new File(file.getPath()+"test2.cvs"));
                 }
             }
         });
