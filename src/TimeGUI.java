@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.time.LocalTime;
 import java.util.Calendar;
+import java.time.LocalDate;
 
 
 public class TimeGUI extends Application {
@@ -121,6 +122,22 @@ public class TimeGUI extends Application {
         interval.setText("30");
         pane.add(interval, 3, 4);
 
+        Label lurlaub = new Label("Urlaub/Monat:");
+        pane.add(lurlaub,0,5);
+        final TextField urlaub = new TextField();
+        urlaub.setText("3:15");
+        pane.add(urlaub, 1, 5);
+
+
+        Label lBegin = new Label("Vertragsbeginn");
+        DatePicker dpBegin = new DatePicker();
+        Label lEnd = new Label("Vertragsende");
+        DatePicker dpEnd = new DatePicker();
+
+        pane.add(lBegin, 0, 6);
+        pane.add(dpBegin, 1, 6);
+        pane.add(lEnd, 0, 7);
+        pane.add(dpEnd, 1, 7);
 
         CheckBox mo = new CheckBox();
         mo.setSelected(true);
@@ -158,24 +175,28 @@ public class TimeGUI extends Application {
         hbox.getChildren().add(sa);
         hbox.getChildren().add(lso);
         hbox.getChildren().add(so);
-        pane.add(hbox, 0, 5, 4,5);
+        pane.add(hbox, 0, 8, 4,5);
 
         Label lname = new Label("Name:");
-        pane.add(lname,0,8,5,8);
+        pane.add(lname,0,14);
         final TextField name = new TextField();
         name.setText("");
-        pane.add(name, 1,8,3,8);
+        pane.add(name, 1,14);
 
         Label lein = new Label("Einrichtung:");
-        pane.add(lein,0,14,5,8);
+        pane.add(lein,0,15);
         final TextField ein = new TextField();
         ein.setText("");
-        pane.add(ein, 1,14,3,8);
+        pane.add(ein, 1,15);
 
+        Label lvertragsname = new Label("Vertragsname:");
+        pane.add(lvertragsname,0,16);
+        final TextField vertragsname = new TextField();
+        vertragsname.setText("");
+        pane.add(vertragsname, 1,16);
 
         final ToggleGroup tgFormat = new ToggleGroup();
 
-        HBox hbFormat = new HBox(3);
 
         Label lFormat = new Label("Format:");
         RadioButton rbCSV = new RadioButton("CSV"),
@@ -184,20 +205,21 @@ public class TimeGUI extends Application {
 
         rbJPG.setToggleGroup(tgFormat);
         rbJPG.setSelected(true);
-        hbFormat.getChildren().add(rbJPG);
         rbCSV.setToggleGroup(tgFormat);
-        hbFormat.getChildren().add(rbCSV);
         rbMD.setToggleGroup(tgFormat);
-        hbFormat.getChildren().add(rbMD);
 
-        pane.add(lFormat, 0, 21, 3, 8);
-        pane.add(hbFormat, 1, 21, 3, 8);
+        HBox hbFormat = new HBox(3);
+        pane.add(lFormat, 0, 17);
+        hbFormat.getChildren().add(rbCSV);
+        hbFormat.getChildren().add(rbJPG);
+        hbFormat.getChildren().add(rbMD);
+        pane.add(hbFormat, 1, 17);
 
         HBox genbox = new HBox();
         genbox.setAlignment(Pos.CENTER);
         Button createbtn = new Button("Generieren und speichern");
         genbox.getChildren().add(createbtn);
-        pane.add(genbox,0,28,4,8);
+        pane.add(genbox,0,35,4,8);
 
         final Text taxMessage = new Text();
         pane.add(taxMessage, 1, 6);
@@ -240,6 +262,8 @@ public class TimeGUI extends Application {
                     LocalTime pe = LocalTime.of(Integer.parseInt(spl[0]), Integer.parseInt(spl[1]));
                     int h = Integer.parseInt(hours.getText());
                     LocalTime iv = LocalTime.of(0, Integer.parseInt(interval.getText()));
+                    String[] uhm = urlaub.getText().split(":");
+                    LocalTime u = LocalTime.of(Integer.parseInt(uhm[0]), Integer.parseInt(uhm[1]));
                     boolean[] wd = {
                             so.isSelected(),
                             mo.isSelected(),
@@ -258,9 +282,12 @@ public class TimeGUI extends Application {
                     tt = new TimeTable(
                         months.getSelectionModel().getSelectedIndex(),
                         Integer.parseInt(year.getText()),
-                        ds, de, ps, pe, iv, h, wd, mst, men,
+                        ds, de, ps, pe, iv, h, u, wd, mst, men,
                         name.getText(),
-                        ein.getText());
+                        ein.getText(),
+                        vertragsname.getText(),
+                        dpBegin.getValue(),
+                        dpEnd.getValue());
                     try {
                       if(rbJPG.isSelected()){
                         tt.printResultsJPG(file);

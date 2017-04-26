@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -28,6 +29,10 @@ public class TimeTable {
 
     String name;
     String einrichtung;
+    String vertrag;
+
+    LocalDate vertragsBegin,
+              vertragsEnde;
 
      int hourspm;
      int year;
@@ -46,6 +51,7 @@ public class TimeTable {
      LocalTime pauseStart;
      LocalTime pauseEnd;
      LocalTime interval;
+     LocalTime urlaub;
 
     //working days of the week beginning with sunday
      boolean[] weekdays;
@@ -56,7 +62,8 @@ public class TimeTable {
     LocalTime[][] starts;
 
     public TimeTable(int month, int years, LocalTime dayStart, LocalTime dayEnd, LocalTime pauseStart, LocalTime pauseEnd,
-                     LocalTime interval, int hourspm, boolean[] weekdays, int stday, int enday, String name, String einrichtung){
+                     LocalTime interval, int hourspm, LocalTime urlaub, boolean[] weekdays, int stday, int enday, String name, String einrichtung,
+                     String vertrag, LocalDate vertragsBegin, LocalDate vertragsEnde){
         posy = new int[32];
         posx = new int[5];
         for(int i = 1; i<32; i++){
@@ -71,6 +78,9 @@ public class TimeTable {
 
         this.einrichtung=einrichtung;
         this.name=name;
+        this.vertrag=vertrag;
+        this.vertragsBegin=vertragsBegin;
+        this.vertragsEnde=vertragsEnde;
 
         this.month = month;
 
@@ -96,6 +106,7 @@ public class TimeTable {
         this.hourspm = hourspm;
 
         this.weekdays = weekdays;
+        this.urlaub = urlaub;
 
         this.workingdays = calcWorkingDays();
         this.hours = new int[workingdays][3];
@@ -198,11 +209,23 @@ public class TimeTable {
     public void printResultsMD(File f) throws Exception {
       BufferedWriter writer = new BufferedWriter(new FileWriter(f));
       //writer.write(month+"."+year+"\n");
+      writer.write("# Arbeitszeiterfassung " + (month+1) + "/" + year + "\n\n");
+      writer.write("## Vertrag\n\n");
+      writer.write("|||\n");
+      writer.write("|---|---|\n");
+      writer.write("|Name|"+name+"|\n");
+      writer.write("|Einrichtung|"+einrichtung+"|\n");
+      writer.write("|Vertragsname|"+vertrag+"|\n");
+      writer.write("|Vertragslaufzeit|"+vertragsBegin+" bis "+vertragsEnde+"|\n");
+      writer.write("|Monatliche Arbeitszeit|"+hourspm+"|\n");
+      writer.write("|Monatlicher Urlaubsanspruch|"+urlaub+"|\n\n");
+      writer.write("##Arbeitszeiten\n");
       writer.write("|Tag|von  |bis  |von  |bis  |Stunden|");
       writer.newLine();
       writer.write("|---|-----|-----|-----|-----|-------|");
       writer.newLine();
 
+      double sum = 0;
       for (int i = 0; i < hours.length; i++) {
           String s = "";
           String s1, s2, s3, s4;
@@ -221,10 +244,13 @@ public class TimeTable {
               s4 = "  -  ";
           }
           double h = (hours[i][1] * interval.getMinute()+hours[i][2] * interval.getMinute())/60.0;
+          sum += h;
           s = String.format("|%3d|%s|%s|%s|%s|%.1f|", hours[i][0], s1, s2, s3, s4,h);
           writer.write(s);
           writer.newLine();
       }
+      writer.write("|---|---|---|---|---|---|\n");
+      writer.write("|||||Summe: |"+String.format("%.1f", sum)+"|\n");
 
       writer.close();
     }
