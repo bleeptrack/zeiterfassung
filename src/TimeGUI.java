@@ -172,14 +172,32 @@ public class TimeGUI extends Application {
         ein.setText("");
         pane.add(ein, 1,14,3,8);
 
+
+        final ToggleGroup tgFormat = new ToggleGroup();
+
+        HBox hbFormat = new HBox(3);
+
+        Label lFormat = new Label("Format:");
+        RadioButton rbCSV = new RadioButton("CSV"),
+                    rbJPG = new RadioButton("JPG"),
+                    rbMD  = new RadioButton("MD");
+
+        rbJPG.setToggleGroup(tgFormat);
+        rbJPG.setSelected(true);
+        hbFormat.getChildren().add(rbJPG);
+        rbCSV.setToggleGroup(tgFormat);
+        hbFormat.getChildren().add(rbCSV);
+        rbMD.setToggleGroup(tgFormat);
+        hbFormat.getChildren().add(rbMD);
+
+        pane.add(lFormat, 0, 21, 3, 8);
+        pane.add(hbFormat, 1, 21, 3, 8);
+
         HBox genbox = new HBox();
         genbox.setAlignment(Pos.CENTER);
         Button createbtn = new Button("Generieren und speichern");
         genbox.getChildren().add(createbtn);
-        pane.add(genbox,0,20,4,8);
-
-
-
+        pane.add(genbox,0,28,4,8);
 
         final Text taxMessage = new Text();
         pane.add(taxMessage, 1, 6);
@@ -204,7 +222,8 @@ public class TimeGUI extends Application {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Zeiterfassung speichern");
                 fileChooser.getExtensionFilters().addAll(
-                        //new FileChooser.ExtensionFilter(".cvs", "*.cvs")
+                        new FileChooser.ExtensionFilter(".md", "*.md"),
+                        new FileChooser.ExtensionFilter(".csv", "*.csv"),
                         new FileChooser.ExtensionFilter(".jpg", "*.jpg")
                 );
                 //System.out.println(pic.getId());
@@ -236,9 +255,36 @@ public class TimeGUI extends Application {
                         mst=Integer.parseInt(mstart.getText());
                         men=Integer.parseInt(mend.getText());
                     }
-                    tt = new TimeTable(months.getSelectionModel().getSelectedIndex(), Integer.parseInt(year.getText()), ds, de, ps, pe, iv, h, wd, mst, men, name.getText(), ein.getText());
-                    tt.printResultsJPG(file);
-                    //tt.printResults(new File(file.getPath()+"test2.cvs"));
+                    tt = new TimeTable(
+                        months.getSelectionModel().getSelectedIndex(),
+                        Integer.parseInt(year.getText()),
+                        ds, de, ps, pe, iv, h, wd, mst, men,
+                        name.getText(),
+                        ein.getText());
+                    try {
+                      if(rbJPG.isSelected()){
+                        tt.printResultsJPG(file);
+                      }
+                      if(rbCSV.isSelected()){
+                        tt.printResults(file);
+                      }
+                      if(rbMD.isSelected()){
+                        tt.printResultsMD(file);
+                      }
+                      Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                      alert.setTitle("Speichern erfolgreich");
+                      alert.setHeaderText(null);
+                      alert.setContentText("Dein Zeiterfassungsbericht wurde gespeichert.");
+                      alert.showAndWait();
+                    } catch(Exception e){
+                      Alert alert = new Alert(Alert.AlertType.ERROR);
+                      alert.setTitle("Fehler beim Speichern");
+                      alert.setHeaderText(null);
+                      alert.setContentText("Dein Zeiterfassungsbericht konnte nicht gespeichert werden.");
+                      alert.showAndWait();
+
+                      System.err.println(e.getStackTrace());
+                    }
                 }
             }
         });
