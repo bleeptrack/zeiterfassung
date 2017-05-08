@@ -129,7 +129,7 @@ public class TimeTable {
         }
 
         //create random hours
-        int elements = actualhous * 60 / interval.getMinute();
+        int elements = (actualhous * 60 - urlaub.getMinute()) / interval.getMinute();
         long am = Duration.between(dayStart, pauseStart).toMinutes() / interval.getMinute();
         long pm = Duration.between(pauseEnd, dayEnd).toMinutes() / interval.getMinute();
         for (int i = 0; i < elements; i++) {
