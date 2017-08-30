@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -28,6 +29,10 @@ public class TimeTable {
 
     String name;
     String einrichtung;
+    String vertrag;
+
+    LocalDate vertragsBegin,
+              vertragsEnde;
 
      int hourspm;
      int year;
@@ -46,6 +51,7 @@ public class TimeTable {
      LocalTime pauseStart;
      LocalTime pauseEnd;
      LocalTime interval;
+     LocalTime urlaub;
 
     //working days of the week beginning with sunday
      boolean[] weekdays;
@@ -56,7 +62,8 @@ public class TimeTable {
     LocalTime[][] starts;
 
     public TimeTable(int month, int years, LocalTime dayStart, LocalTime dayEnd, LocalTime pauseStart, LocalTime pauseEnd,
-                     LocalTime interval, int hourspm, boolean[] weekdays, int stday, int enday, String name, String einrichtung){
+                     LocalTime interval, int hourspm, LocalTime urlaub, boolean[] weekdays, int stday, int enday, String name, String einrichtung,
+                     String vertrag, LocalDate vertragsBegin, LocalDate vertragsEnde){
         posy = new int[32];
         posx = new int[5];
         for(int i = 1; i<32; i++){
@@ -71,6 +78,9 @@ public class TimeTable {
 
         this.einrichtung=einrichtung;
         this.name=name;
+        this.vertrag=vertrag;
+        this.vertragsBegin=vertragsBegin;
+        this.vertragsEnde=vertragsEnde;
 
         this.month = month;
 
@@ -96,6 +106,7 @@ public class TimeTable {
         this.hourspm = hourspm;
 
         this.weekdays = weekdays;
+        this.urlaub = urlaub;
 
         this.workingdays = calcWorkingDays();
         this.hours = new int[workingdays][3];
@@ -118,7 +129,7 @@ public class TimeTable {
         }
 
         //create random hours
-        int elements = actualhous * 60 / interval.getMinute();
+        int elements = (actualhous * 60 - urlaub.getMinute()) / interval.getMinute();
         long am = Duration.between(dayStart, pauseStart).toMinutes() / interval.getMinute();
         long pm = Duration.between(pauseEnd, dayEnd).toMinutes() / interval.getMinute();
         for (int i = 0; i < elements; i++) {
@@ -154,92 +165,124 @@ public class TimeTable {
 
     }
 
-    public void printResultsJPG(File f){
+    public void printResultsJPG(File f) throws Exception{
         BufferedImage img = null;
-        try {
-            //img = ImageIO.read(new File("src/template.jpg"));
-            //InputStream in = getClass().getResourceAsStream("/template.jpg");
-            //BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            img = ImageIO.read(getClass().getResourceAsStream("/template.jpg"));
+        //img = ImageIO.read(new File("src/template.jpg"));
+        //InputStream in = getClass().getResourceAsStream("/template.jpg");
+        //BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        img = ImageIO.read(getClass().getResourceAsStream("/template.jpg"));
 
-            int w = img.getWidth();
-            int h = img.getHeight();
+        int w = img.getWidth();
+        int h = img.getHeight();
 
-            Graphics2D g2d = img.createGraphics();
-            g2d.drawImage(img, 0, 0, null);
-            g2d.setPaint(Color.BLACK);
+        Graphics2D g2d = img.createGraphics();
+        g2d.drawImage(img, 0, 0, null);
+        g2d.setPaint(Color.BLACK);
 
-            g2d.setFont(new Font("Serif", Font.BOLD, 60));
-            g2d.drawString(""+einrichtung, 2060, 230);
-            g2d.drawString(""+name, 500, 230);
-            g2d.drawString(""+(month+1)+"/"+year, 1300, 135);
+        g2d.setFont(new Font("Serif", Font.BOLD, 60));
+        g2d.drawString(""+einrichtung, 2060, 230);
+        g2d.drawString(""+name, 500, 230);
+        g2d.drawString(""+(month+1)+"/"+year, 1300, 135);
 
-            g2d.setFont(new Font("Serif", Font.BOLD, 40));
+        g2d.setFont(new Font("Serif", Font.BOLD, 40));
 
-            for(int i = 0; i<hours.length; i++){
-                if (hours[i][1] != 0) {
-                    g2d.drawString("" + starts[i][0], posx[0], posy[hours[i][0]]);
-                    g2d.drawString("" + starts[i][0].plusMinutes(hours[i][1] * interval.getMinute()), posx[1], posy[hours[i][0]]);
-                }
-                if (hours[i][2] != 0) {
-                    g2d.drawString("" + starts[i][1], posx[2], posy[hours[i][0]]);
-                    g2d.drawString("" + starts[i][1].plusMinutes(hours[i][2] * interval.getMinute()), posx[3], posy[hours[i][0]]);
-                }
-                g2d.drawString(""+(hours[i][1] * interval.getMinute()+hours[i][2] * interval.getMinute())/60.0, posx[4], posy[hours[i][0]]);
+        for(int i = 0; i<hours.length; i++){
+            if (hours[i][1] != 0) {
+                g2d.drawString("" + starts[i][0], posx[0], posy[hours[i][0]]);
+                g2d.drawString("" + starts[i][0].plusMinutes(hours[i][1] * interval.getMinute()), posx[1], posy[hours[i][0]]);
             }
-
-            g2d.drawString(""+hourspm, 1520, 2000);
-            g2d.drawString(""+hourspm, 3015, 435);
-            g2d.drawString(""+hourspm, 3015, 535);
-
-            g2d.dispose();
-            ImageIO.write(img, "jpg", f);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
+            if (hours[i][2] != 0) {
+                g2d.drawString("" + starts[i][1], posx[2], posy[hours[i][0]]);
+                g2d.drawString("" + starts[i][1].plusMinutes(hours[i][2] * interval.getMinute()), posx[3], posy[hours[i][0]]);
+            }
+            g2d.drawString(""+(hours[i][1] * interval.getMinute()+hours[i][2] * interval.getMinute())/60.0, posx[4], posy[hours[i][0]]);
         }
 
+        g2d.drawString(""+hourspm, 1520, 2000);
+        g2d.drawString(""+hourspm, 3015, 435);
+        g2d.drawString(""+hourspm, 3015, 535);
+
+        g2d.dispose();
+        ImageIO.write(img, "jpg", f);
     }
 
-    public void printResults(File f) {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(f));
-            //writer.write(month+"."+year+"\n");
-            writer.write("Tag;von  ;bis  ;von  ;bis  ;Stunden");
-            writer.newLine();
+    public void printResultsMD(File f) throws Exception {
+      BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+      //writer.write(month+"."+year+"\n");
+      writer.write("# Arbeitszeiterfassung " + (month+1) + "/" + year + "\n\n");
+      writer.write("## Vertrag\n\n");
+      writer.write("|||\n");
+      writer.write("|---|---|\n");
+      writer.write("|Name|"+name+"|\n");
+      writer.write("|Einrichtung|"+einrichtung+"|\n");
+      writer.write("|Vertragsname|"+vertrag+"|\n");
+      writer.write("|Vertragslaufzeit|"+vertragsBegin+" bis "+vertragsEnde+"|\n");
+      writer.write("|Monatliche Arbeitszeit|"+hourspm+"|\n");
+      writer.write("|Monatlicher Urlaubsanspruch|"+urlaub+"|\n\n");
+      writer.write("##Arbeitszeiten\n");
+      writer.write("|Tag|von  |bis  |von  |bis  |Stunden|");
+      writer.newLine();
+      writer.write("|---|-----|-----|-----|-----|-------|");
+      writer.newLine();
 
-            for (int i = 0; i < hours.length; i++) {
-                String s = "";
-                String s1, s2, s3, s4;
-                if (hours[i][1] != 0) {
-                    s1 = "" + starts[i][0];
-                    s2 = "" + starts[i][0].plusMinutes(hours[i][1] * interval.getMinute());
-                } else {
-                    s1 = "  -  ";
-                    s2 = "  -  ";
-                }
-                if (hours[i][2] != 0) {
-                    s3 = "" + starts[i][1];
-                    s4 = "" + starts[i][1].plusMinutes(hours[i][2] * interval.getMinute());
-                } else {
-                    s3 = "  -  ";
-                    s4 = "  -  ";
-                }
-                double h = (hours[i][1] * interval.getMinute()+hours[i][2] * interval.getMinute())/60.0;
-                s = String.format("%3d;%s;%s;%s;%s;%.1f", hours[i][0], s1, s2, s3, s4,h);
-                writer.write(s);
-                writer.newLine();
-            }
+      double sum = 0;
+      for (int i = 0; i < hours.length; i++) {
+          String s = "";
+          String s1, s2, s3, s4;
+          if (hours[i][1] != 0) {
+              s1 = "" + starts[i][0];
+              s2 = "" + starts[i][0].plusMinutes(hours[i][1] * interval.getMinute());
+          } else {
+              s1 = "  -  ";
+              s2 = "  -  ";
+          }
+          if (hours[i][2] != 0) {
+              s3 = "" + starts[i][1];
+              s4 = "" + starts[i][1].plusMinutes(hours[i][2] * interval.getMinute());
+          } else {
+              s3 = "  -  ";
+              s4 = "  -  ";
+          }
+          double h = (hours[i][1] * interval.getMinute()+hours[i][2] * interval.getMinute())/60.0;
+          sum += h;
+          s = String.format("|%3d|%s|%s|%s|%s|%.1f|", hours[i][0], s1, s2, s3, s4,h);
+          writer.write(s);
+          writer.newLine();
+      }
+      writer.write("|---|---|---|---|---|---|\n");
+      writer.write("|||||Summe: |"+String.format("%.1f", sum)+"|\n");
 
-            writer.close();
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Speichern erfolgreich");
-            alert.setHeaderText(null);
-            alert.setContentText("Dein Zeiterfassungsbericht wurde gespeichert.");
+      writer.close();
+    }
 
-            alert.showAndWait();
-        } catch (Exception e) {
-
+    public void printResults(File f) throws Exception {
+      BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+      //writer.write(month+"."+year+"\n");
+      writer.write("Tag;von  ;bis  ;von  ;bis  ;Stunden");
+      writer.newLine();
+      for (int i = 0; i < hours.length; i++) {
+        String s = "";
+        String s1, s2, s3, s4;
+        if (hours[i][1] != 0) {
+          s1 = "" + starts[i][0];
+          s2 = "" + starts[i][0].plusMinutes(hours[i][1] * interval.getMinute());
+        } else {
+          s1 = "  -  ";
+          s2 = "  -  ";
         }
+        if (hours[i][2] != 0) {
+          s3 = "" + starts[i][1];
+          s4 = "" + starts[i][1].plusMinutes(hours[i][2] * interval.getMinute());
+        } else {
+          s3 = "  -  ";
+          s4 = "  -  ";
+        }
+        double h = (hours[i][1] * interval.getMinute()+hours[i][2] * interval.getMinute())/60.0;
+        s = String.format("%3d;%s;%s;%s;%s;%.1f", hours[i][0], s1, s2, s3, s4,h);
+        writer.write(s);
+        writer.newLine();
+      }
+      writer.close();
     }
 
 
